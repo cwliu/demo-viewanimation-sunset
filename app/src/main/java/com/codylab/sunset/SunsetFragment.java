@@ -42,17 +42,10 @@ public class SunsetFragment extends Fragment {
         mSeaView = view.findViewById(R.id.sea);
         mSkyView = view.findViewById(R.id.sky);
 
-        mSunView.setOnClickListener(new View.OnClickListener() {
+        mSceneView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startSunsetAnimation();
-            }
-        });
-
-        mSeaView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startSunriseAnimation();
+                startSunsetAndSunrise();
             }
         });
 
@@ -64,7 +57,7 @@ public class SunsetFragment extends Fragment {
         return view;
     }
 
-    private void startSunsetAnimation() {
+    private AnimatorSet getSunsetAnimation() {
         float sunYStart = mSunView.getTop();
         float sunYEnd = mSkyView.getHeight();
 
@@ -86,16 +79,17 @@ public class SunsetFragment extends Fragment {
 
         AnimatorSet animationSet = new AnimatorSet();
         animationSet.play(heightAnimator).with(sunsetSkyAnimator).before(nightskyAnimator);
-        animationSet.start();
+//        animationSet.start();
+        return animationSet;
     }
 
-    private void startSunriseAnimation() {
+    private AnimatorSet getSunriseAnimation() {
         float sunYStart = mSkyView.getHeight();
         float sunYEnd = mSkyView.getHeight() / 3;
 
         ObjectAnimator heightAnimator = ObjectAnimator.ofFloat(mSunView, "y", sunYStart, sunYEnd);
         heightAnimator.setDuration(3000);
-//        heightAnimator.setInterpolator(new AccelerateInterpolator(2));
+        heightAnimator.setInterpolator(new AccelerateInterpolator(2));
 
         ObjectAnimator nightskyAnimator = ObjectAnimator.ofInt(
                 mSkyView, "backgroundColor", mNightSkyColor, mSunsetSkyColor
@@ -111,6 +105,16 @@ public class SunsetFragment extends Fragment {
 
         AnimatorSet animationSet = new AnimatorSet();
         animationSet.play(nightskyAnimator).before(heightAnimator).before(sunsetSkyAnimator);
+//        animationSet.start();
+        return animationSet;
+    }
+    private void startSunsetAndSunrise(){
+        AnimatorSet sunsetAnimation = getSunsetAnimation();
+        AnimatorSet sunriseAnimation = getSunriseAnimation();
+
+        AnimatorSet animationSet = new AnimatorSet();
+        animationSet.playSequentially(sunsetAnimation, sunriseAnimation);
         animationSet.start();
     }
+
 }
